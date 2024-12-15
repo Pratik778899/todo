@@ -55,10 +55,7 @@ exports.register = async (req, res) => {
     // Generate JWT token with 18 seconds expiration
     const token = jwt.sign(
       { email: newUser.email, password: newUser.password,role: newUser.role },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      JWT_SECRET
     );
 
     res.status(201).json({

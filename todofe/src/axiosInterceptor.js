@@ -31,8 +31,9 @@ instance.interceptors.response.use(
     (error) => {
         const status = error.response?.status;
         if (status === 401) {
-            // localStorage.removeItem("token");
-            // window.location.href = "/login";
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            window.location.href = "/login";
             toast.error(error.response?.data?.message || "Unauthorized. Please log in again.");
         } else if (status === 403) {
             toast.error(error.response?.data?.message || "Forbidden. You don't have permission.");

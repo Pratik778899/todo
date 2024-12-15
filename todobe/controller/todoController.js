@@ -12,19 +12,27 @@ exports.checkRole = (roles) => (req, res, next) => {
   
 
 exports.getAllTodos = async (req, res) => {
-    const { id, role } = req.user; // Assuming user info is stored in `req.user`
-    
+    const { id, role } = req.user;
+
     try {
       let todos;
-      if (role === "admin") {
-        todos = await Todo.findAll(); // Admin sees all tasks
-      } else {
-        todos = await Todo.findAll({
-          where: { [role === "assigner" ? "assigner" : "assignedTo"]: id },
-        });
-      }
+      todos = await Todo.findAll({
+        atribute: role === "assigner" ? "assigner" : "assignedTo",
+        value: id,
+      });
+
+      // if (role === "admin") {
+      //   todos = await Todo.findAll();
+      // } else {
+      //   todos = await Todo.findAll({
+      //     where: { [role === "assigner" ? "assigner" : "assignedTo"]: id },
+      //   });
+      // }
   
-      res.status(200).json(todos);
+      res.status(200).json({
+        message: "Todos fetched successfully",
+        todos,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server Error" });

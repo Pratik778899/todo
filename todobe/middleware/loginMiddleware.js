@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = "Pratik@$7809"
 exports.isLoggedIn = (req, res, next) => {
-  const token = req.headers.authorization || req.headers.authorization.split(' ')[1];
+  const token = req.headers.authorization.split(' ')[1] || req.headers.authorization;
   
   if (token) {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {      

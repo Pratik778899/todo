@@ -55,37 +55,61 @@ const Todo = () => {
 
   useEffect(() => {
     fetchUsers();
+    getAllTodos();
   }, []);
 
   const fetchUsers = async () => {
-    instance.get("/users").then((res) => {
-      setUsers(res.data.users);
-    }).catch((err) => {
-      console.log(err);
-    });
+    instance
+      .get("/users")
+      .then((res) => {
+        setUsers(res.data.users);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const getAllTodos = async () => {
+    instance
+      .get("/todos")
+      .then((res) => {
+        const todos = res?.data?.todos?.map((item) => ({
+          id: item.id,
+          text: item.description,
+          completed: item.status == 0 ? false : true,
+          assignedTo: item.assignedTo,
+        }));
+        setTasks(todos);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   // Add a new task
   const handleAddTask = async () => {
     if (newTask.trim() && selectedUser) {
-      instance.post("/todos", {
-        title: newTask.slice(0, 10),
-        description: newTask.trim(),
-        status: false,
-        assignedTo: selectedUser,
-      }).then((res) => {
-        setTasks([
-          ...tasks,
-          {
-            id: Date.now(),
-            text: newTask.trim(),
-            completed: false,
-            assignedTo: selectedUser,
-          },
-        ]);
-      }).catch((err) => {
-        console.log(err);
-      });
+      instance
+        .post("/todos", {
+          title: newTask.slice(0, 10),
+          description: newTask.trim(),
+          status: false,
+          assignedTo: selectedUser,
+        })
+        .then((res) => {
+          setTasks([
+            ...tasks,
+            {
+              id: Date.now(),
+              text: newTask.trim(),
+              completed: false,
+              assignedTo: selectedUser,
+            },
+          ]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
       setNewTask("");
       setSelectedUser("");
     }
@@ -172,7 +196,7 @@ const Todo = () => {
             Add Task
           </Button>
         </Box>
-        {tasks.length > 0 && (
+        {tasks && tasks?.length > 0 && (
           <Button
             variant="outlined"
             color="error"
@@ -183,7 +207,7 @@ const Todo = () => {
           </Button>
         )}
         <Box>
-          {tasks.map((task) => (
+          {tasks?.map((task) => (
             <TaskContainer key={task.id}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Checkbox
