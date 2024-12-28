@@ -1,9 +1,9 @@
 const Login = require("../model/login");
 const Todo = require("../model/todoModel");
 
-exports.checkRole = (roles) => (req, res, next) => {
+exports.checkRole = (roles) => (req, res, next) => {  
     const userRole = req.user.role; // Assuming user role is stored in `req.user`
-    if (roles.includes(userRole)) {
+    if (!roles.includes(userRole)) {
       return res.status(403).json({ message: "Access denied" });
     }
     next();

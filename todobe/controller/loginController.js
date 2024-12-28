@@ -17,7 +17,7 @@ exports.login = async (req, res) => {
 
     if (isMatch) {
       const token = jwt.sign(
-        { email: user.email, password: user.password },
+        { email: user.email, password: user.password, role: user.role },
         JWT_SECRET,
         { expiresIn: "1h" }
       );
@@ -32,7 +32,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password , role} = req.body;
+  const { email, password, role } = req.body;
 
   try {
     // Check if user already exists
@@ -54,7 +54,7 @@ exports.register = async (req, res) => {
 
     // Generate JWT token with 18 seconds expiration
     const token = jwt.sign(
-      { email: newUser.email, password: newUser.password,role: newUser.role },
+      { email: newUser.email, password: newUser.password, role: newUser.role },
       JWT_SECRET
     );
 

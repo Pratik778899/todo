@@ -46,6 +46,7 @@ const TaskContainer = styled(Box)({
 });
 
 const Todo = () => {
+  const userRole = localStorage.getItem("userId");
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
@@ -78,6 +79,7 @@ const Todo = () => {
           text: item.description,
           completed: item.status == 0 ? false : true,
           assignedTo: item.assignedTo,
+          user: userRole,
         }));
         setTasks(todos);
       })
@@ -104,6 +106,7 @@ const Todo = () => {
               text: newTask.trim(),
               completed: false,
               assignedTo: selectedUser,
+              user: userRole,
             },
           ]);
         })
@@ -124,7 +127,11 @@ const Todo = () => {
   };
 
   // Save the edited task
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
+    await instance.put(`/todos/${editTaskId}`, {
+      description: taskToEdit,
+      user: userRole,
+    });
     setTasks(
       tasks.map((task) =>
         task.id === editTaskId
@@ -137,9 +144,15 @@ const Todo = () => {
     setSelectedUser("");
   };
 
-  // Delete a task
-  const handleDeleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const onDelete = async (id) => {
+    await instance
+      .delete(`/todos/${id}`)
+      .then((res) => {
+        setTasks(tasks.filter((task) => task.id !== id));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   // Mark a task as completed
@@ -269,10 +282,7 @@ const Todo = () => {
                   </Tooltip>
                 )}
                 <Tooltip title="Delete Task">
-                  <IconButton
-                    onClick={() => handleDeleteTask(task.id)}
-                    color="error"
-                  >
+                  <IconButton onClick={() => onDelete(task.id)} color="error">
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
