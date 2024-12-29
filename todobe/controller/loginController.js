@@ -13,11 +13,11 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);  
 
     if (isMatch) {
       const token = jwt.sign(
-        { email: user.email, password: user.password, role: user.role },
+        { email: user.email, password: user.password, role: user.role ,id:user.id},
         JWT_SECRET,
         { expiresIn: "1h" }
       );

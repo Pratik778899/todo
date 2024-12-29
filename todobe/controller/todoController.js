@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const Login = require("../model/login");
 const Todo = require("../model/todoModel");
 
@@ -11,33 +12,38 @@ exports.checkRole = (roles) => (req, res, next) => {
 
   
 
+
 exports.getAllTodos = async (req, res) => {
-    const { id, role } = req.user;
+  const { role, id: userId } = req.user;
 
-    try {
-      let todos;
+  try {
+    let todos;
+
+    if (role === "admin") {
+      // Admin gets all todos
+      todos = await Todo.findAll();
+    } else {
+      // Fetch todos based on assigner or assignedTo
       todos = await Todo.findAll({
-        atribute: role === "assigner" ? "assigner" : "assignedTo",
-        value: id,
+        where: {
+          [Op.or]: [
+            { assigner: userId },   // Todos created by the user
+            { assignedTo: userId } // Todos assigned to the user
+          ]
+        }
       });
-
-      // if (role === "admin") {
-      //   todos = await Todo.findAll();
-      // } else {
-      //   todos = await Todo.findAll({
-      //     where: { [role === "assigner" ? "assigner" : "assignedTo"]: id },
-      //   });
-      // }
-  
-      res.status(200).json({
-        message: "Todos fetched successfully",
-        todos,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server Error" });
     }
-  };
+
+    res.status(200).json({
+      message: "Todos fetched successfully",
+      todos,
+    });
+  } catch (error) {
+    console.error("Error fetching todos:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
   
 
 exports.getTodoById = async (req, res) => {

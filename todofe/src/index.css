@@ -13,13 +13,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  font-family: "Plus Jakarta Sans", serif;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
+   font-family: "Plus Jakarta Sans", serif;
 }
+
 a:hover {
   color: #535bf2;
+   font-family: "Plus Jakarta Sans", serif;
 }
 
 body {
@@ -28,11 +35,13 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+   font-family: "Plus Jakarta Sans", serif;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+   font-family: "Plus Jakarta Sans", serif;
 }
 
 button {
@@ -45,24 +54,34 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+   font-family: "Plus Jakarta Sans", serif;
 }
+
 button:hover {
   border-color: #646cff;
+   font-family: "Plus Jakarta Sans", serif;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+   font-family: "Plus Jakarta Sans", serif;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
+     font-family: "Plus Jakarta Sans", serif;
   }
+
   a:hover {
     color: #747bff;
+     font-family: "Plus Jakarta Sans", serif;
   }
+
   button {
     background-color: #f9f9f9;
+     font-family: "Plus Jakarta Sans", serif;
   }
 }

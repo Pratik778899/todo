@@ -17,12 +17,13 @@ import instance from "./axiosInterceptor";
 
 // Styled components for gradient background and layout
 const GradientBackground = styled("div")({
-  background: "radial-gradient(circle, rgba(5, 0, 0, 0.1), rgba(5, 0, 0, 0.1))",
+  // background: "radial-gradient(circle, rgba(5, 0, 0, 0.1), rgba(5, 0, 0, 0.1))",
   height: "100vh",
   width: "100vw",
   padding: "20px",
   color: "#fff",
   overflowY: "auto",
+  fontFamily: "Plus Jakarta Sans",
 });
 
 const ContentContainer = styled(Box)({
@@ -31,18 +32,29 @@ const ContentContainer = styled(Box)({
   alignItems: "center",
   justifyContent: "center",
   marginTop: "20px",
+  fontFamily: "Plus Jakarta Sans",
 });
 
 const TaskContainer = styled(Box)({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  width: "100%",
-  maxWidth: "600px",
+  width: "50rem",
+  // maxWidth: "100%",
   marginBottom: "10px",
   backgroundColor: "#333",
   padding: "10px",
   borderRadius: "5px",
+  fontFamily: "Plus Jakarta Sans",
+});
+
+const LogoutButton = styled(Button)({
+  marginTop: "20px",
+  backgroundColor: "#f44336",
+  color: "#fff",
+  '&:hover': {
+    backgroundColor: "#d32f2f",
+  },
 });
 
 const Todo = () => {
@@ -53,6 +65,7 @@ const Todo = () => {
   const [taskToEdit, setTaskToEdit] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [users, setUsers] = useState([]);
+  const [newTitle, setNewTitle] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -63,7 +76,8 @@ const Todo = () => {
     instance
       .get("/users")
       .then((res) => {
-        setUsers(res.data.users);
+        const userLoggedIn = JSON.parse(localStorage.getItem("userId"));        
+        setUsers(res.data.users.filter((user) => user.id !== userLoggedIn.id));
       })
       .catch((err) => {
         console.log(err);
@@ -76,6 +90,7 @@ const Todo = () => {
       .then((res) => {
         const todos = res?.data?.todos?.map((item) => ({
           id: item.id,
+          title: item.title,
           text: item.description,
           completed: item.status == 0 ? false : true,
           assignedTo: item.assignedTo,
@@ -90,10 +105,10 @@ const Todo = () => {
 
   // Add a new task
   const handleAddTask = async () => {
-    if (newTask.trim() && selectedUser) {
+    if (newTask.trim() && selectedUser && newTitle.trim()) {
       instance
         .post("/todos", {
-          title: newTask.slice(0, 10),
+          title: newTitle.slice(0, 50),
           description: newTask.trim(),
           status: false,
           assignedTo: selectedUser,
@@ -107,6 +122,7 @@ const Todo = () => {
               completed: false,
               assignedTo: selectedUser,
               user: userRole,
+              title: newTitle.slice(0, 50),
             },
           ]);
         })
@@ -115,6 +131,7 @@ const Todo = () => {
         });
       setNewTask("");
       setSelectedUser("");
+      setNewTitle("");
     }
   };
 
@@ -156,12 +173,21 @@ const Todo = () => {
   };
 
   // Mark a task as completed
-  const handleToggleComplete = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleToggleComplete = async (id) => {
+    await instance
+      .put(`/todos/${id}`, {
+        status: tasks.find((task) => task.id === id).completed ? false : true,
+      })
+      .then((res) => {
+        setTasks(
+          tasks.map((task) =>
+            task.id === id ? { ...task, completed: !task.completed } : task
+          )
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   // Remove all tasks
@@ -169,13 +195,34 @@ const Todo = () => {
     setTasks([]);
   };
 
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
+  const getUserEmail = (userId) => {
+    return users.find(user => user.id === userId)?.email || 'Unknown User';
+  };
+
   return (
     <GradientBackground>
+      <LogoutButton variant="contained" onClick={handleLogout}>
+          Logout
+        </LogoutButton>
       <ContentContainer>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom sx={{color:"#000"}}>
           Todo List
         </Typography>
         <Box sx={{ width: "100%", maxWidth: "600px", marginBottom: "20px" }}>
+          <TextField
+            fullWidth
+            label="Task Title"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            sx={{ marginBottom: "10px" }}
+          />
           <TextField
             fullWidth
             label="Add New Task"
@@ -237,7 +284,7 @@ const Todo = () => {
                       sx={{ marginRight: "10px", backgroundColor: "#fff" }}
                     />
                     <Select
-                      value={selectedUser}
+                      value={getUserEmail(task.assignedTo)}
                       onChange={(e) => setSelectedUser(e.target.value)}
                       size="small"
                       sx={{ marginRight: "10px" }}
@@ -250,15 +297,43 @@ const Todo = () => {
                     </Select>
                   </>
                 ) : (
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      textDecoration: task.completed ? "line-through" : "none",
-                      color: task.completed ? "#aaa" : "#fff",
-                    }}
-                  >
-                    {task.text} (Assigned to: {task.assignedTo})
-                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        textDecoration: task.completed ? "line-through" : "none",
+                        color: task.completed ? "#aaa" : "#fff",
+                        fontWeight: "bold",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      title:- {task.title}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        textDecoration: task.completed ? "line-through" : "none",
+                        color: task.completed ? "#aaa" : "#fff",
+                        fontWeight: "bold",
+                        marginBottom: "5px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "15px",
+                        color:"orange"
+                      }}
+                    >
+                      <Typography variant="body1">description:-</Typography> {task.text}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: task.completed ? "#aaa" : "#fff",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Assigned to: {getUserEmail(task.assignedTo).replace("@gmail.com", "")}
+                    </Typography>
+                  </Box>
                 )}
               </Box>
               <Box>
